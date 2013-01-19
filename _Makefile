@@ -1,0 +1,2 @@
+All:
+	g++ -D _DEBUG -D _LINUX -g test.cpp Util/CInterval.cpp Util/CDateTime.cpp Util/CAutoLock.cpp Util/CLog.cpp -o test
