@@ -34,24 +34,6 @@ namespace Net
         return true;
     }
 
-    bool CAcceptor::setNonBlocking(int fd)
-    {
-        int opts = fcntl(fd, F_GETFL);
-        if (opts < 0)
-        {
-            printf("get opts error\n");
-            return false;
-        }
-
-        opts |= O_NONBLOCK;
-
-        if (fcntl(fd, F_SETFL, opts) < 0)
-        {
-            printf("set opts error\n");
-            return false;
-        }
-    }
-
     void CAcceptor::onStart()
     {
         _isRunning = true;
@@ -64,8 +46,7 @@ namespace Net
 
     void CAcceptor::onService()
     {
-        
-
+        connect_fd = socket(AF_INET, SOCK_STREAM, 0);
     }
 }
 

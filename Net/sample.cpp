@@ -68,7 +68,7 @@ int main()
     maxi = 0;
 
     for( ; ; ) { 
-        nfds=epoll_wait(epfd,events,20,500); //等待epoll事件的发生
+        nfds=epoll_wait(epfd,events,20,500); //等待epoll事件的发生
         for(i=0;i<nfds;++i) //处理所发生的所有事件 
         { 
             if(events.data.fd==listenfd) /**监听事件**/

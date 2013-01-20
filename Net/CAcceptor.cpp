@@ -128,8 +128,6 @@ namespace Net
                         close(_currentSocket);
                         event.data.fd = -1;
                     }
-
-                    //[TODO]
                 }
             }
         }

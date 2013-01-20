@@ -26,6 +26,8 @@ namespace Util
                 return &lock;
             }
 
+            void bind(const std::string& dirName, FILE* pFileHandle);
+
         public:
             CLog();
 
