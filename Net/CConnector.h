@@ -10,7 +10,7 @@ namespace Net
     class CConnector : public Util::ITask
     {
     private:
-        CBuffer _buffer;
+        Util::CBuffer _buffer;
 
     public:
         CConnector();
@@ -20,5 +20,7 @@ namespace Net
         virtual void onStart();
         virtual void onStop();
         virtual void onService();
+
+        bool send(void* pData, unsigned int size);
     };
 }

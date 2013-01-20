@@ -84,19 +84,47 @@ namespace Util
 
     void CBuffer::append(void* pData, unsigned int size)
     {
-        if (getSize() + size > _size)
+        while (getSize() + size > _size)
         {
-            int beginPos = _pBegin - _pBuffer;
-            int endPos = _pEnd - pBuffer;
-
-            _size <<= 1;
-
-            pBuffer = realloc(pBuffer, _size);
-
-            _pBegin = _pBuffer + beginPos;
-            _pEnd = _pBuffer + endPos;
+            appendSpace();
         }
 
+        memcpy(_pEnd, pData, size);
         _pEnd += size;
+    }
+
+    void* CBuffer::getBuffer()
+    {
+        return _pEnd;
+    }
+
+    unsigned int CBuffer::getRemainSpace()
+    {
+        return _size - (_pEnd - _pBuffer);
+    }
+
+    void CBuffer::appendSize(unsigned int size)
+    {
+        return _pEnd += size;
+    }
+
+    void appendSpace(unsigned int space)
+    {
+        int beginPos = _pBegin - _pBuffer;
+        int endPos = _pEnd - pBuffer;     
+      
+        if (0 == space)
+        {
+            _size <<= 1;
+        }
+        else
+        {
+            _size += space;
+        }
+                                          
+        pBuffer = realloc(pBuffer, _size);
+                                          
+        _pBegin = _pBuffer + beginPos;    
+        _pEnd = _pBuffer + endPos;        
     }
 }

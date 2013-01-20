@@ -28,7 +28,10 @@ namespace Util
         int64_t readInt64();
 
         void append(void* pData, unsigned int size);
+        void appendSize(unsigned int size);
+        void appendSpace(unsigned int space = 0);
         unsigned int getLength();
         unsigned int getSize();
+        unsigned int getRemainSpace();
     };
 }

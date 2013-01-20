@@ -55,6 +55,7 @@ namespace Net
         addr.sin_addr.s_addr = inet_addr(_ip);
         addr.sin_port = htons(_port);
 
+CONNECT:
         do 
         {
             int ret = connect(connect_fd, 
@@ -68,10 +69,43 @@ namespace Net
 
                 sleep(100);
             }
-        }while (SOCKET_ERROR == ret);
+        }while (SOCKET_ERROR == ret && _isRunning);
 
-        int len = read(connect_fd, snd_buf, len);
+        while (_isRunning)
+        {
+            unsigned int remainSpace = _buffer.getRemainSpace();
+            if (0 == remainSpace)
+            {
+                _buffer.appendSpace();
+                remainSpace = _buffer.getRemainSpace();
+            }
 
+            int len = read(connect_fd, _buffer.getBuffer(), remainSpace);
+            if (len > 0)
+            {
+                _buffer.appendSize(len);
+
+                LOG_DEBUG("data in");
+                //[TODO]
+            }
+            else
+            {
+                LOG_ERROR("read error!" <<
+                        " socket:" << connect_fd <<
+                        " len:" << len);
+
+                closesocket(connect_fd);
+                _buffer.clear();
+
+                goto CONNECT;
+            }
+        }
+    }
+
+    
+    bool CConnector::send(void* pData, unsigned int size)
+    {
+        
     }
 }
 

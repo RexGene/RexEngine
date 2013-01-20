@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Util/ITask.h"
+#include "CBuffer.h"
 
 #include <string>
 
@@ -15,6 +16,7 @@ namespace Net
         unsigned int _maxFdCount;
         unsigned int _timeout;
         bool _isRunning;
+        Util::CBuffer _buffer;
 
     private:
         bool setNonBlocking(int fd);

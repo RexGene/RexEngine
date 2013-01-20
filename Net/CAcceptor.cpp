@@ -1,5 +1,6 @@
 #include "CAcceptor.h"
 
+#include "Util/CLog.h"
 #include "Util/CStringHelper.h"
 
 #include <strings.h>
@@ -40,7 +41,7 @@ namespace Net
         int opts = fcntl(fd,F_GETFL);
         if (opts < 0)
         {
-            printf("get opts error\n");
+            LOG_ERROR("get opts error");
             return false;
         }
 
@@ -48,7 +49,7 @@ namespace Net
 
         if (fcntl(fd, F_SETFL, opts) < 0)
         {
-            printf("set opts error\n");
+            LOG_ERROR("set opts error");
             return false;
         }
     }
@@ -104,7 +105,7 @@ namespace Net
                     int connfd = accept(listenfd, (sockaddr*)&clientAddr, &socklen);
                     if (connfd < 0)
                     {
-                        printf("accept error");
+                        LOG_ERROR("accept error");
                         continue;
                     }
 
@@ -122,14 +123,31 @@ namespace Net
                         continue;
                     }
 
-                    int n = read(_currentSocket, 0, 0);
+                    unsigned int remainSpace = _buffer.getRemainSpace();
+                    if (0 == remainSpace)
+                    {
+                        _buffer.appendSpace();
+                        remainSpace = _buffer.getRemainSpace();
+                    }
+                    int n = read(_currentSocket, _buffer.getBuffer,
+                            remainSpace);
+
                     if (n <= 0)
                     {
+                        _buffer.clear();
                         close(_currentSocket);
                         event.data.fd = -1;
+
+                        LOG_ERROR("read data error");
                     }
+
+                    _buffer.appendSize(n);
+
+                    //[TODO]
                 }
             }
         }
     }
 }
+
+

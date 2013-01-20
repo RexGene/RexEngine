@@ -58,9 +58,6 @@ void CLog::log(ELogType logType, const std::string& content)
     {
         std::cerr << stream.str();
     }
-    else
-    {
-        std::cout << stream.str();
-    }
 
+    std::cout << stream.str();
 }
