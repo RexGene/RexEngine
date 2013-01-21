@@ -114,6 +114,17 @@ namespace Net
                     ev.data.fd=connfd;
                     ev.events=EPOLLIN | EPOLLET;
                     epoll_ctl(epfd, EPOLL_CTL_ADD, connfd, &ev);
+
+                    std::pair<IntCBufferMap::iterator, bool> result = 
+                        _bufferMap.insert(std::make_pair(connfd, Util::CBuffer()));
+
+                    if (!result.second)
+                    {
+                        LOG_ERROR("socket is already exist!" <<
+                                " socket:" << connfd);
+
+                        result.first->second.clear();
+                    }
                 }
                 else if (event.events & EPOLLIN)
                 {
@@ -123,25 +134,33 @@ namespace Net
                         continue;
                     }
 
-                    unsigned int remainSpace = _buffer.getRemainSpace();
+                    IntCBufferMap::iterator iter = _bufferMap.find(_currentSocket);
+                    if (iter == _bufferMap.end())
+                    {
+                        LOG_ERROR("can not found socket:" << _currentSocket);
+                    }
+
+                    Util::CBuffer& dataBuffer = iter->second;
+
+                    unsigned int remainSpace = dataBuffer.getRemainSpace();
                     if (0 == remainSpace)
                     {
-                        _buffer.appendSpace();
-                        remainSpace = _buffer.getRemainSpace();
+                        dataBuffer.appendSpace();
+                        remainSpace = dataBuffer.getRemainSpace();
                     }
-                    int n = read(_currentSocket, _buffer.getBuffer,
+                    int n = read(_currentSocket, dataBuffer.getBuffer,
                             remainSpace);
 
                     if (n <= 0)
                     {
-                        _buffer.clear();
+                        dataBuffer.clear();
                         close(_currentSocket);
                         event.data.fd = -1;
 
                         LOG_ERROR("read data error");
                     }
 
-                    _buffer.appendSize(n);
+                    dataBuffer.appendSize(n);
 
                     //[TODO]
                 }

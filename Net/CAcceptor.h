@@ -4,11 +4,14 @@
 #include "CBuffer.h"
 
 #include <string>
+#include <map>
 
 namespace Net
 {
     class CAcceptor : public Util::ITask
     {
+    private:
+        typedef std::map<int, Util::CBuffer> IntCBufferMap;
     private:
         std::string _ip;
         unsigned int _port;
@@ -16,7 +19,7 @@ namespace Net
         unsigned int _maxFdCount;
         unsigned int _timeout;
         bool _isRunning;
-        Util::CBuffer _buffer;
+        IntCBufferMap _bufferMap;
 
     private:
         bool setNonBlocking(int fd);

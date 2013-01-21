@@ -48,7 +48,7 @@ namespace Net
     void CAcceptor::onService()
     {
         struct sockaddr_in addr;
-        int connect_fd = socket(AF_INET, SOCK_STREAM, 0);
+        _connect_fd = socket(AF_INET, SOCK_STREAM, 0);
 
         bzero(&addr, sizeof(addr));
         addr.sin_family = AF_INET;
@@ -58,7 +58,7 @@ namespace Net
 CONNECT:
         do 
         {
-            int ret = connect(connect_fd, 
+            int ret = connect(_connect_fd, 
                     (struct sockaddr*)&addr, sizeof(addr));
 
             if (SOCKET_ERROR == ret)
@@ -80,7 +80,7 @@ CONNECT:
                 remainSpace = _buffer.getRemainSpace();
             }
 
-            int len = read(connect_fd, _buffer.getBuffer(), remainSpace);
+            int len = read(_connect_fd, _buffer.getBuffer(), remainSpace);
             if (len > 0)
             {
                 _buffer.appendSize(len);
@@ -91,10 +91,10 @@ CONNECT:
             else
             {
                 LOG_ERROR("read error!" <<
-                        " socket:" << connect_fd <<
+                        " socket:" << _connect_fd <<
                         " len:" << len);
 
-                closesocket(connect_fd);
+                closesocket(_connect_fd);
                 _buffer.clear();
 
                 goto CONNECT;

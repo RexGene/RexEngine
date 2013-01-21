@@ -10,6 +10,7 @@ namespace Net
     class CConnector : public Util::ITask
     {
     private:
+        int _connect_fd;
         Util::CBuffer _buffer;
 
     public:
