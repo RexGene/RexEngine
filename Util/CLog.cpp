@@ -11,17 +11,22 @@ CLog::CLog()
 
 }
 
-void CLog::init(const std::string& dirName)
+void CLog::bind(const std::string& dirName, FILE* pFileHandle)
 {
-    mkdir(dirName.c_str(), 0777);
+    mkdir(dirName.c_str(), 0754);
 
     std::string fileName = dirName + "/" + CDateTime().asString("YYYY-MM-DD") + ".log";
 
-    if (NULL == freopen(fileName.c_str(), "a", stdout))
+    if (NULL == freopen(fileName.c_str(), "a", pFileHandle))
     {
-        fprintf(stderr, "error redirecting stdout\n");
-        fclose(stderr);
+        fprintf(pFileHandle, "error redirecting\n");
     }
+}
+
+void CLog::init(const std::string& dirName)
+{
+    bind(dirName, stdout);
+    bind(dirName + "_Error", stderr);
 }
 
 void CLog::log(ELogType logType, const std::string& content)
@@ -48,6 +53,11 @@ void CLog::log(ELogType logType, const std::string& content)
     }
 
     stream << content << std::endl;
+
+    if (ELogType_Error == logType)
+    {
+        std::cerr << stream.str();
+    }
 
     std::cout << stream.str();
 }

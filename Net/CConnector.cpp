@@ -1,6 +1,7 @@
 #include "CAcceptor.h"
 
 #include "Util/CStringHelper.h"
+#include "Util/CLog.h"
 
 #include <strings.h>
 #include <sys/socket.h>
@@ -34,24 +35,6 @@ namespace Net
         return true;
     }
 
-    bool CAcceptor::setNonBlocking(int fd)
-    {
-        int opts = fcntl(fd, F_GETFL);
-        if (opts < 0)
-        {
-            printf("get opts error\n");
-            return false;
-        }
-
-        opts |= O_NONBLOCK;
-
-        if (fcntl(fd, F_SETFL, opts) < 0)
-        {
-            printf("set opts error\n");
-            return false;
-        }
-    }
-
     void CAcceptor::onStart()
     {
         _isRunning = true;
@@ -64,8 +47,65 @@ namespace Net
 
     void CAcceptor::onService()
     {
-        
+        struct sockaddr_in addr;
+        int connect_fd = socket(AF_INET, SOCK_STREAM, 0);
 
+        bzero(&addr, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = inet_addr(_ip);
+        addr.sin_port = htons(_port);
+
+CONNECT:
+        do 
+        {
+            int ret = connect(connect_fd, 
+                    (struct sockaddr*)&addr, sizeof(addr));
+
+            if (SOCKET_ERROR == ret)
+            {
+                LOG_ERROR("connect error!" <<
+                        " ip:" << _ip <<
+                        " port:" << _port);
+
+                sleep(100);
+            }
+        }while (SOCKET_ERROR == ret && _isRunning);
+
+        while (_isRunning)
+        {
+            unsigned int remainSpace = _buffer.getRemainSpace();
+            if (0 == remainSpace)
+            {
+                _buffer.appendSpace();
+                remainSpace = _buffer.getRemainSpace();
+            }
+
+            int len = read(connect_fd, _buffer.getBuffer(), remainSpace);
+            if (len > 0)
+            {
+                _buffer.appendSize(len);
+
+                LOG_DEBUG("data in");
+                //[TODO]
+            }
+            else
+            {
+                LOG_ERROR("read error!" <<
+                        " socket:" << connect_fd <<
+                        " len:" << len);
+
+                closesocket(connect_fd);
+                _buffer.clear();
+
+                goto CONNECT;
+            }
+        }
+    }
+
+    
+    bool CConnector::send(void* pData, unsigned int size)
+    {
+        
     }
 }
 
